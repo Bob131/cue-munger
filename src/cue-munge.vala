@@ -11,6 +11,7 @@ abstract class BaseMunger : Object {
 
 class CueMunger : Application {
     BaseMunger[] mungers = {
+        new MusicBrainz()
     };
 
     string usage = "Usage: %s <munger> <file>\n<munger> is one of:\n%s\n";

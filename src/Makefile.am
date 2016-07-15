@@ -2,6 +2,7 @@ bin_PROGRAMS = cue-munge
 
 cue_munge_SOURCES = \
 	$(top_srcdir)/libgue/gue.vapi \
+	mungers/musicbrainz.vala \
 	cue-munge.vala
 cue_munge_VALAFLAGS = \
 	$(cue_U_VALAFLAGS)
@@ -11,6 +12,7 @@ cue_munge_CFLAGS = \
 	$(cue_U_CFLAGS)
 cue_munge_LDADD = \
 	$(top_srcdir)/libgue/libgue.la \
+	-lm \
 	$(cue_U_LIBS)
 
 CLEANFILES = \
