@@ -17,7 +17,7 @@ class MusicBrainz : BaseMunger {
                 length_str = "%.f:%02.f".printf(Math.floor(length / 60),
                     Math.round(length % 60));
 
-            lines += "%02d. %s - %s (%s)".printf(track.number,
+            lines += "%d. %s - %s (%s)".printf(track.number,
                 (!) (track.title ?? "[untitled]"),
                 (!) (track.performer ?? "[unknown]"),
                 length_str);
