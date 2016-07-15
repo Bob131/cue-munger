@@ -36,6 +36,8 @@ fi
 
 GOBJECT_INTROSPECTION_CHECK([1.40.0])
 
+GLIB_TESTS
+
 dnl ###########################################################################
 dnl Files to generate
 dnl ###########################################################################
@@ -44,6 +46,7 @@ AC_CONFIG_FILES([
 Makefile
 libgue/Makefile
 libgue/libgue.pc
+libgue/tests/Makefile
 src/Makefile
 ])
 AC_OUTPUT

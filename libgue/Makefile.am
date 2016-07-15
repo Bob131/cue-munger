@@ -1,3 +1,5 @@
+SUBDIRS = tests
+
 lib_LTLIBRARIES = libgue.la
 
 include_HEADERS = gue.h
