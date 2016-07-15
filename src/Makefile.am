@@ -1,22 +1,22 @@
-bin_PROGRAMS = cue-munge
+bin_PROGRAMS = cue-munger
 
-cue_munge_SOURCES = \
+cue_munger_SOURCES = \
 	$(top_srcdir)/libgue/gue.vapi \
 	mungers/musicbrainz.vala \
-	cue-munge.vala
-cue_munge_VALAFLAGS = \
+	cue-munger.vala
+cue_munger_VALAFLAGS = \
 	$(cue_U_VALAFLAGS)
-cue_munge_CFLAGS = \
+cue_munger_CFLAGS = \
 	-I $(top_srcdir)/libgue \
 	-w \
 	$(cue_U_CFLAGS)
-cue_munge_LDADD = \
+cue_munger_LDADD = \
 	$(top_srcdir)/libgue/libgue.la \
 	-lm \
 	$(cue_U_LIBS)
 
 CLEANFILES = \
-	$(cue_munge_SOURCES:%.vala=%.c) \
+	$(cue_munger_SOURCES:%.vala=%.c) \
 	*.stamp \
 	*.stamp-t
 

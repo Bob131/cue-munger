@@ -65,4 +65,4 @@ libgue/gue.vapi
 libgue/Gue-*.gir
 libgue/Gue-*.typelib
 
-src/cue-munge
+src/cue-munger
