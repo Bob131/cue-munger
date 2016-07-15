@@ -62,5 +62,7 @@ Makefile.in
 libgue/*.h
 libgue/gue.deps
 libgue/gue.vapi
+libgue/Gue-*.gir
+libgue/Gue-*.typelib
 
 src/cue-munge

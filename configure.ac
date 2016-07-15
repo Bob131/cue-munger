@@ -1,4 +1,4 @@
-AC_INIT([cue-munge], m4_esyscmd_s([echo "0-`git describe --always`"]))
+AC_INIT([cue-munge], [0.1])
 
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
@@ -33,6 +33,8 @@ AC_CHECK_PROG(RAGEL_CHECK,ragel,yes)
 if test x"$RAGEL_CHECK" != x"yes"; then
   AC_MSG_ERROR([Cannot find ragel])
 fi
+
+GOBJECT_INTROSPECTION_CHECK([1.40.0])
 
 dnl ###########################################################################
 dnl Files to generate

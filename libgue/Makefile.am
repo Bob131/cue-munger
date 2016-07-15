@@ -4,11 +4,23 @@ include_HEADERS = gue.h
 guevapidir = $(datadir)/vala/vapi
 guevapi_DATA = gue.vapi gue.deps
 
+girdir = $(datadir)/gir-1.0
+gir_DATA = Gue-$(VERSION).gir
+typelibdir = $(datadir)/girepository-1.0
+typelib_DATA = Gue-$(VERSION).typelib
 
-BUILT_SOURCES = gue.h gue-priv.h gue.vapi gue.deps scanner.c
+
+BUILT_SOURCES = \
+	gue.h gue-priv.h \
+	gue.vapi gue.deps \
+	Gue-$(VERSION).gir Gue-$(VERSION).typelib \
+	scanner.c
 
 gue.deps:
 	$(AM_V_GEN) printf "gio-2.0\n" > $@
+
+Gue-$(VERSION).typelib: Gue-$(VERSION).gir
+	$(AM_V_GEN) g-ir-compiler --shared-library=libgue.la --output=$@ $<
 
 scanner.c: scanner.rl
 	$(AM_V_GEN) ragel -o $@ $<
@@ -23,6 +35,7 @@ libgue_la_VALAFLAGS = \
 	--library gue \
 	-H gue.h -h gue-priv.h \
 	--vapi gue.vapi \
+	--gir Gue-$(VERSION).gir \
 	$(cue_U_VALAFLAGS)
 libgue_la_CFLAGS = \
 	$(cue_U_CFLAGS)
