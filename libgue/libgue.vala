@@ -92,7 +92,8 @@ namespace Gue {
 
         internal new bool parse_node(Node.Command command) throws ParseError {
             if (command.command == Token.Command.INDEX) {
-                if (start_time == null) {
+                if (command.arguments.data == "00"
+                        || command.arguments.data == "01") {
                     uint minutes, seconds, frames;
                     command.arguments.next.data.scanf("%02d:%02d:%02d",
                         out minutes, out seconds, out frames);
