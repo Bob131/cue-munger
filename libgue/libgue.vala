@@ -19,73 +19,81 @@ namespace Gue {
         }
     }
 
-    public abstract class Container : Object {
-        internal string? _title = null;
-        public string? title {get {return _title;}}
+    internal class StringValues {
+        HashTable<Token.Command*, string?> values =
+            new HashTable<Token.Command*, string?>(int_hash, str_equal);
 
-        internal string? _performer = null;
-        public string? performer {get {return _performer;}}
+        Token.Command[] _valid_keys = {};
+        public Token.Command[] valid_keys {get {return _valid_keys;}}
+
+        public void set_valid(Token.Command[] keys) {
+            foreach (var key in keys)
+                _valid_keys += key;
+        }
+
+        public bool @set(Node.Command command) throws ParseError {
+            if (!(command.command in valid_keys)
+                    || command.arguments.length() != 1)
+                return false;
+            if (values.contains(&command.command))
+                throw new ParseError.INVALID("%s already set",
+                    command.command.to_string());
+            values.set(&command.command, command.arguments.data);
+            return true;
+        }
+
+        public unowned string? @get(Token.Command key) {
+            return values.get(&key);
+        }
+    }
+
+    public abstract class Container : Object {
+        internal StringValues values = new StringValues();
+
+        Token.Command[] valid_keys = {Token.Command.TITLE,
+            Token.Command.PERFORMER};
+        public string? title {get {return values[Token.Command.TITLE];}}
+        public string? performer {get {return values[Token.Command.PERFORMER];}}
 
         internal string[] _comments = {};
         public string[] comments {owned get {return _comments;}}
 
         internal bool parse_node(Node.Command command) throws ParseError {
-            if (command.command == Token.Command.TITLE)
-                if (_title == null) {
-                    _title = command.arguments.data;
-                    return true;
-                } else
-                    throw new ParseError.INVALID("TITLE already set");
-            else if (command.command == Token.Command.PERFORMER)
-                if (_performer == null) {
-                    _performer = command.arguments.data;
-                    return true;
-                } else
-                    throw new ParseError.INVALID("PERFORMER already set");
-            else if (command.command == Token.Command.REM) {
+            if (command.command == Token.Command.REM) {
                 var comment = "";
                 foreach (var arg in command.arguments)
                     comment += arg;
                 _comments += comment;
                 return true;
             }
-            return false;
+            return values.set(command);
         }
 
-        internal Container() {}
+        internal Container() {
+            values.set_valid(valid_keys);
+        }
     }
 
     public class Track : Container {
-        internal int _number;
-        public int number {get {return _number;}}
-
-        internal string? _isrc = null;
-        public string? isrc {get {return _isrc;}}
+        Token.Command[] valid_keys = {Token.Command.ISRC};
+        public string? isrc {get {return this.values[Token.Command.ISRC];}}
 
         internal weak File _parent_file;
         public weak File parent_file {get {return _parent_file;}}
 
-        internal new bool parse_node(Node.Command command)
-            throws ParseError
-        {
-            if (base.parse_node(command))
-                return true;
+        internal int _number;
+        public int number {get {return _number;}}
 
-            if (command.command == Token.Command.ISRC)
-                if (_isrc == null) {
-                    _isrc = command.arguments.data;
-                    return true;
-                } else
-                    throw new ParseError.INVALID("ISRC already set");
-            else if (command.command == Token.Command.INDEX)
+        internal new bool parse_node(Node.Command command) throws ParseError {
+            if (command.command == Token.Command.INDEX)
                 return true;
-
-            return false;
+            return base.parse_node(command);
         }
 
         internal Track(File parent, Node.Command track)
             requires (track.command == Token.Command.TRACK)
         {
+            this.values.set_valid(valid_keys);
             _parent_file = parent;
             _number = int.parse(track.arguments.data);
         }
@@ -113,32 +121,28 @@ namespace Gue {
     }
 
     public class Sheet : Container {
-        string? _barcode = null;
-        public string? barcode {get {return _barcode;}}
+        Token.Command[] valid_keys = {Token.Command.CATALOG};
+        public string? barcode {get {
+            return this.values[Token.Command.CATALOG];
+        }}
 
         File[] _files = {};
         public File[] files {owned get {return _files;}}
         Track[] _tracks = {};
         public Track[] tracks {owned get {return _tracks;}}
 
-        internal new void parse_node(Node.Command command) throws ParseError
-            requires (command.command == Token.Command.CATALOG)
-        {
-            if (_barcode == null)
-                _barcode = command.arguments.data;
-            else
-                throw new ParseError.INVALID("CATALOG already set");
-        }
-
         public Sheet.parse_from_string(string data) throws ParseError {
             var parse_tree = lex_cue(data);
             if (parse_tree.length() == 1)
                 throw new ParseError.EMPTY("Cue sheet appears to be empty");
 
+            this.values.set_valid(valid_keys);
+
             // CD-wide data is stored in a dummy node
             foreach (var command in parse_tree.data.tracks.data.commands)
-                if (!base.parse_node(command))
-                    this.parse_node(command);
+                if (!this.parse_node(command))
+                    throw new ParseError.INVALID("Unhandled command '%s'",
+                        command.command.to_string());
 
             // skip CD-wide data
             foreach (var file_token in parse_tree.next) {
@@ -153,7 +157,9 @@ namespace Gue {
                     // skip track info
                     foreach (var command in track_token.commands.next)
                         if (!track.parse_node(command))
-                            this.parse_node(command);
+                            throw new ParseError.INVALID(
+                                "Unhandled command '%s'",
+                                command.command.to_string());
 
                     file._tracks += (owned) track;
                     this._tracks += track;
