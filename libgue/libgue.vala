@@ -84,9 +84,36 @@ namespace Gue {
         internal int _number;
         public int number {get {return _number;}}
 
+        internal float? _start_time = null;
+        public float? start_time {get {return _start_time;}}
+
+        internal float? _length = null;
+        public float? length {get {return _length;}}
+
         internal new bool parse_node(Node.Command command) throws ParseError {
-            if (command.command == Token.Command.INDEX)
+            if (command.command == Token.Command.INDEX) {
+                if (start_time == null) {
+                    uint minutes, seconds, frames;
+                    command.arguments.next.data.scanf("%02d:%02d:%02d",
+                        out minutes, out seconds, out frames);
+                    if (seconds >= 60)
+                        throw new ParseError.INVALID(
+                            "'%u' is an invalid seconds value", seconds);
+                    if (frames >= 75)
+                        throw new ParseError.INVALID(
+                            "'%u' is an invalid frames value", frames);
+                    _start_time =
+                        (minutes * 60) + seconds + (frames * (1f / 75f));
+                    if (parent_file._tracks.length > 0) {
+                        var prev =
+                            parent_file._tracks[parent_file._tracks.length-1];
+                        if (prev.start_time != null) {
+                            prev._length = _start_time - prev.start_time;
+                        }
+                    }
+                }
                 return true;
+            }
             return base.parse_node(command);
         }
 
@@ -161,7 +188,7 @@ namespace Gue {
                                 "Unhandled command '%s'",
                                 command.command.to_string());
 
-                    file._tracks += (owned) track;
+                    file._tracks += track;
                     this._tracks += track;
                 }
 
