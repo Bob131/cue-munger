@@ -53,6 +53,8 @@ Makefile.in
 *.la
 .libs/
 
+*.cue
+
 **/tests/*
 !**/tests/*.vala
 !**/tests/Makefile.am
