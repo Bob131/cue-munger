@@ -165,11 +165,16 @@ namespace Gue {
 
             this.values.set_valid(valid_keys);
 
+            Node.Command? default_performer_node = null;
+
             // CD-wide data is stored in a dummy node
-            foreach (var command in parse_tree.data.tracks.data.commands)
+            foreach (var command in parse_tree.data.tracks.data.commands) {
                 if (!this.parse_node(command))
                     throw new ParseError.INVALID("Unhandled command '%s'",
                         command.command.to_string());
+                if (command.command == Token.Command.PERFORMER)
+                    default_performer_node = command;
+            }
 
             // skip CD-wide data
             foreach (var file_token in parse_tree.next) {
@@ -187,6 +192,10 @@ namespace Gue {
                             throw new ParseError.INVALID(
                                 "Unhandled command '%s'",
                                 command.command.to_string());
+
+                    if (track.performer == null
+                            && default_performer_node != null)
+                        track.values.set((!) default_performer_node);
 
                     file._tracks += track;
                     this._tracks += track;
