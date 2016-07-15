@@ -60,6 +60,7 @@ Makefile.in
 !**/tests/Makefile.am
 
 libgue/*.h
+libgue/libgue.pc
 libgue/gue.deps
 libgue/gue.vapi
 libgue/Gue-*.gir

@@ -1,6 +1,9 @@
 lib_LTLIBRARIES = libgue.la
 
 include_HEADERS = gue.h
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = libgue.pc
+
 guevapidir = $(datadir)/vala/vapi
 guevapi_DATA = gue.vapi gue.deps
 
@@ -12,6 +15,7 @@ typelib_DATA = Gue-$(VERSION).typelib
 
 BUILT_SOURCES = \
 	gue.h gue-priv.h \
+	libgue.pc \
 	gue.vapi gue.deps \
 	Gue-$(VERSION).gir Gue-$(VERSION).typelib \
 	scanner.c

@@ -43,6 +43,7 @@ dnl ###########################################################################
 AC_CONFIG_FILES([
 Makefile
 libgue/Makefile
+libgue/libgue.pc
 src/Makefile
 ])
 AC_OUTPUT
