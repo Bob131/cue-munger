@@ -56,3 +56,7 @@ Makefile.in
 **/tests/*
 !**/tests/*.vala
 !**/tests/Makefile.am
+
+libgue/*.h
+libgue/gue.deps
+libgue/gue.vapi

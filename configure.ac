@@ -9,27 +9,30 @@ AM_SILENT_RULES([yes])
 AM_PROG_VALAC([0.28])
 AM_PROG_CC_C_O
 
+LT_INIT([disable-static])
+
 dnl ###########################################################################
 dnl Dependencies
 dnl ###########################################################################
 
 GLIB_REQUIRED=2.40.0
 
-PKG_CHECK_MODULES(cue_munge_U, [
+PKG_CHECK_MODULES(cue_U, [
   glib-2.0 >= $GLIB_REQUIRED
   gobject-2.0 >= $GLIB_REQUIRED
   gio-2.0 >= $GLIB_REQUIRED
-  libcue
 ])
 
-AC_SUBST([cue_munge_U_VALAFLAGS], ["--pkg gio-2.0 \
-          --vapidir \$(top_srcdir)/vapi \
-          --pkg libcue \
+AC_SUBST([cue_U_VALAFLAGS], ["--pkg gio-2.0 \
           --target-glib=$GLIB_REQUIRED \
           --fatal-warnings \
+          --enable-checking \
           --enable-experimental-non-null"])
 
-CFLAGS="$CFLAGS -w"
+AC_CHECK_PROG(RAGEL_CHECK,ragel,yes)
+if test x"$RAGEL_CHECK" != x"yes"; then
+  AC_MSG_ERROR([Cannot find ragel])
+fi
 
 dnl ###########################################################################
 dnl Files to generate
@@ -37,6 +40,7 @@ dnl ###########################################################################
 
 AC_CONFIG_FILES([
 Makefile
+libgue/Makefile
 src/Makefile
 ])
 AC_OUTPUT
