@@ -15,3 +15,10 @@ is a list of known missing capabilities:
     * POSTGAP
     * PREGAP
     * SONGWRITER
+
+
+Unit tests really are a must, and we can poach some [test data from cuetools'
+libcue](https://github.com/lipnitsk/libcue/tree/master/t).
+
+
+There should be API for constructing `Gue.Sheet` from a `GFile`.
