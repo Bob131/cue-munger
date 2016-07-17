@@ -15,6 +15,3 @@ is a list of known missing capabilities:
     * POSTGAP
     * PREGAP
     * SONGWRITER
-
-
-There should be API for constructing `Gue.Sheet` from a `GFile`.

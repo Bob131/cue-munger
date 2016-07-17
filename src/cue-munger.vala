@@ -49,21 +49,11 @@ class CueMunger : Application {
             return 1;
         }
 
-        var file = cmd.create_file_for_arg(args[2]);
-        uint8[] cue_data;
-        try {
-            string _;
-            file.load_contents(null, out cue_data, out _);
-        } catch (Error e) {
-            stderr.printf("Failed to read '%s': %s\n", file.get_parse_name(),
-                e.message);
-            return 1;
-        }
-
         Gue.Sheet cue_sheet;
         try {
-            cue_sheet = new Gue.Sheet.parse_data(cue_data);
-        } catch (Gue.ParseError e) {
+            cue_sheet = new Gue.Sheet.parse_file(
+                cmd.create_file_for_arg(args[2]));
+        } catch (Error e) {
             stderr.printf("Failed to parse cue sheet: %s\n", e.message);
             return 1;
         }

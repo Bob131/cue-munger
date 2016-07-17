@@ -159,6 +159,20 @@ namespace Gue {
         Track[] _tracks = {};
         public Track[] tracks {owned get {return _tracks;}}
 
+        public Sheet.parse_file(GLib.File file) throws Error {
+            uint8[] data;
+            string _;
+            file.load_contents(null, out data, out _);
+            Sheet.parse_data(data);
+        }
+
+        public async Sheet.parse_file_async(GLib.File file) throws Error {
+            uint8[] data;
+            string _;
+            yield file.load_contents_async(null, out data, out _);
+            Sheet.parse_data(data);
+        }
+
         public Sheet.parse_data(uint8[] data) throws ParseError {
             var detect = new CharsetDetect.Context();
             detect.handle_data((string) data, data.length);
