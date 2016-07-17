@@ -55,5 +55,8 @@ CLEANFILES = \
 	$(BUILT_SOURCES) \
 	*.stamp
 
+clean-local:
+	rm -f *.gir *.typelib
+
 dist-hook:
 	cd $(distdir); rm -f $(CLEANFILES)
