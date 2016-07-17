@@ -62,7 +62,7 @@ class CueMunger : Application {
 
         Gue.Sheet cue_sheet;
         try {
-            cue_sheet = new Gue.Sheet.parse_from_string((string) cue_data);
+            cue_sheet = new Gue.Sheet.parse_data(cue_data);
         } catch (Gue.ParseError e) {
             stderr.printf("Failed to parse cue sheet: %s\n", e.message);
             return 1;
@@ -71,7 +71,7 @@ class CueMunger : Application {
         try {
             stdout.printf("%s\n", ((!) munger).munge(cue_sheet));
         } catch (MungeError e) {
-            stderr.printf("Munging failed: %s", e.message);
+            stderr.printf("Munging failed: %s\n", e.message);
             return 1;
         }
 

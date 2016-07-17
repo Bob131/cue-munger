@@ -8,7 +8,6 @@ cue_munger_VALAFLAGS = \
 	$(cue_U_VALAFLAGS)
 cue_munger_CFLAGS = \
 	-I $(top_srcdir)/libgue \
-	-w \
 	$(cue_U_CFLAGS)
 cue_munger_LDADD = \
 	$(top_srcdir)/libgue/libgue.la \

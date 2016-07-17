@@ -1,4 +1,4 @@
-AC_INIT([cue-munger], [0.1])
+AC_INIT([cue-munger], [0.2])
 
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
@@ -11,6 +11,8 @@ AM_PROG_CC_C_O
 
 LT_INIT([disable-static])
 
+CFLAGS="$CFLAGS -w"
+
 dnl ###########################################################################
 dnl Dependencies
 dnl ###########################################################################
@@ -21,6 +23,7 @@ PKG_CHECK_MODULES(cue_U, [
   glib-2.0 >= $GLIB_REQUIRED
   gobject-2.0 >= $GLIB_REQUIRED
   gio-2.0 >= $GLIB_REQUIRED
+  uchardet
 ])
 
 AC_SUBST([cue_U_VALAFLAGS], ["--pkg gio-2.0 \

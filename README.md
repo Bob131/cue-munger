@@ -47,8 +47,9 @@ Pretty straight-forward, just your usual autotools setup:
     make && make install
 ```
 
-You'll need GLib dev packages, [Ragel][ragel] and whatever package provides
-`g-ir-compiler` on your system (`gobject-introspection-devel` on Fedora).
+You'll need GLib and uchardet dev packages, [Ragel][ragel] and whatever package
+provides `g-ir-compiler` on your system (`gobject-introspection-devel` on
+Fedora).
 
 
 [cue sheet wiki]: https://en.wikipedia.org/wiki/Cue_sheet_(computing)

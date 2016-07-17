@@ -159,8 +159,39 @@ namespace Gue {
         Track[] _tracks = {};
         public Track[] tracks {owned get {return _tracks;}}
 
-        public Sheet.parse_from_string(string data) throws ParseError {
-            var parse_tree = lex_cue(data);
+        public Sheet.parse_data(uint8[] data) throws ParseError {
+            var detect = new CharsetDetect.Context();
+            detect.handle_data((string) data, data.length);
+            detect.data_end();
+            var charset = detect.get_charset().dup();
+
+            string copy;
+
+            if (charset == "") {
+                warning("Unknown character encoding, %s",
+                    "defaulting to UTF-8");
+                charset = "UTF-8";
+            }
+
+            if (charset != "UTF-8")
+                try {
+                    copy = convert((string) data, data.length, "UTF-8",
+                        charset);
+                    if (!((!) copy).validate())
+                        throw new ConvertError.ILLEGAL_SEQUENCE(
+                            "Output isn't valid UTF-8");
+                } catch (ConvertError e) {
+                    throw new ParseError.INVALID(
+                        "Failed to convert encoding from %s to UTF-8: %s",
+                        charset, e.message);
+                }
+            else
+                copy = (string) data;
+
+            if (copy.has_prefix("\xef\xbb\xbf"))
+                copy = copy[3:copy.length];
+
+            var parse_tree = lex_cue((!) copy);
             if (parse_tree.length() == 1)
                 throw new ParseError.EMPTY("Cue sheet appears to be empty");
 

@@ -42,6 +42,7 @@ libgue_la_VALAFLAGS = \
 	-H gue.h -h gue-priv.h \
 	--vapi gue.vapi \
 	--gir Gue-$(VERSION).gir \
+	--vapidir . --pkg uchardet \
 	$(cue_U_VALAFLAGS)
 libgue_la_CFLAGS = \
 	$(cue_U_CFLAGS)
