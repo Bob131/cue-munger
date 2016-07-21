@@ -73,7 +73,7 @@ namespace Gue {
         internal float? _length = null;
         public float? length {get {return _length;}}
 
-        Sheet parent;
+        weak Sheet parent;
 
         internal new bool parse_node(Node.Command command) throws ParseError {
             if (command.command == Token.Command.INDEX) {
