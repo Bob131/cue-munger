@@ -1,7 +1,7 @@
 bin_PROGRAMS = cue-munger
 
 cue_munger_SOURCES = \
-	$(top_srcdir)/libgue/gue.vapi \
+	$(top_srcdir)/libgue/gue-$(VERSION).vapi \
 	mungers/musicbrainz.vala \
 	cue-munger.vala
 cue_munger_VALAFLAGS = \

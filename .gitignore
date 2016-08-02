@@ -61,8 +61,8 @@ Makefile.in
 
 libgue/*.h
 libgue/libgue.pc
-libgue/gue.deps
-libgue/gue.vapi
+libgue/gue-*.deps
+libgue/gue-*.vapi
 libgue/Gue-*.gir
 libgue/Gue-*.typelib
 

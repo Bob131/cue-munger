@@ -6,8 +6,8 @@ include_HEADERS = gue.h
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgue.pc
 
-guevapidir = $(datadir)/vala/vapi
-guevapi_DATA = gue.vapi gue.deps
+vapidir = $(datadir)/vala/vapi
+vapi_DATA = gue-$(VERSION).vapi gue-$(VERSION).deps
 
 girdir = $(datadir)/gir-1.0
 gir_DATA = Gue-$(VERSION).gir
@@ -18,11 +18,11 @@ typelib_DATA = Gue-$(VERSION).typelib
 BUILT_SOURCES = \
 	gue.h gue-priv.h \
 	libgue.pc \
-	gue.vapi gue.deps \
+	gue-$(VERSION).vapi gue-$(VERSION).deps \
 	Gue-$(VERSION).gir Gue-$(VERSION).typelib \
 	scanner.c
 
-gue.deps:
+gue-$(VERSION).deps:
 	$(AM_V_GEN) printf "gio-2.0\n" > $@
 
 Gue-$(VERSION).typelib: Gue-$(VERSION).gir
@@ -40,7 +40,7 @@ libgue_la_SOURCES = \
 libgue_la_VALAFLAGS = \
 	--library gue \
 	-H gue.h -h gue-priv.h \
-	--vapi gue.vapi \
+	--vapi gue-$(VERSION).vapi \
 	--gir Gue-$(VERSION).gir \
 	--vapidir . --pkg uchardet \
 	$(cue_U_VALAFLAGS)
@@ -55,8 +55,9 @@ CLEANFILES = \
 	$(BUILT_SOURCES) \
 	*.stamp
 
+# clean up BUILT_SOURCES from prev versions
 clean-local:
-	rm -f *.gir *.typelib
+	rm -f *.gir *.typelib gue-*.vapi gue-*.deps
 
 dist-hook:
 	cd $(distdir); rm -f $(CLEANFILES)

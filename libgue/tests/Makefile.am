@@ -4,7 +4,7 @@ test_programs = \
 	parser-test
 
 parser_test_SOURCES = \
-	../gue.vapi \
+	../gue-$(VERSION).vapi \
 	parser-test.vala
 parser_test_VALAFLAGS = $(cue_U_VALAFLAGS)
 parser_test_CFLAGS = \
