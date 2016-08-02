@@ -46,10 +46,10 @@ namespace Gue {
 
         internal bool parse_node(Node.Command command) throws ParseError {
             if (command.command == Token.Command.REM) {
-                var comment = "";
+                string?[]? words = {};
                 foreach (var arg in command.arguments)
-                    comment += arg;
-                _comments += comment;
+                    words += arg;
+                _comments += string.joinv(" ", words);
                 return true;
             }
             return values.set(command);
