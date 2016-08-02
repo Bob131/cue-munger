@@ -4,6 +4,7 @@
 internal class Token {
     public enum Command {
         CATALOG,
+        FILE,
         INDEX,
         ISRC,
         PERFORMER,
@@ -34,5 +35,13 @@ internal class Node {
 
     public class Track {
         public SList<Command> commands;
+    }
+
+    public class File {
+        public SList<Track> tracks;
+
+        public File() {
+            tracks.prepend(new Track());
+        }
     }
 }

@@ -138,7 +138,9 @@ void eac_test() {
 
     assert ((!) sheet.title == "Eurovision Song Contest 2015 - Disc 1");
     assert ((!) sheet.performer == "Various Artists");
+
     assert (sheet.generated_by_eac);
+    assert (sheet.files.length == 0);
 
     assert (sheet.comments[0] == "GENRE Pop");
     assert (sheet.comments[1] == "DATE 2015");

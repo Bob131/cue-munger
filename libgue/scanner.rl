@@ -36,11 +36,11 @@
     catalog       = "CATALOG" > MatchStart % CmdEnd
                         delim
                         digit {13} > MatchStart % StringEnd;
-    file          = "FILE"
+    file          = "FILE" > MatchStart % CmdEnd
                         delim
-                        (quoted_string | unquot_string)
+                        string
                         delim
-                        ("BINARY" | "MOTOROLA" | "AIFF" | "WAVE" | "MP3");
+                        ("WAVE" | "MP3") > MatchStart % StringEnd;
     index         = "INDEX" > MatchStart % CmdEnd
                         delim
                         ("00" | "01") > MatchStart % StringEnd
