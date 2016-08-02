@@ -6,8 +6,8 @@ namespace Gue {
     }
 
     internal class StringValues {
-        HashTable<Token.Command*, string?> values =
-            new HashTable<Token.Command*, string?>(int_hash, str_equal);
+        HashTable<Token.Command, string?> values =
+            new HashTable<Token.Command, string?>(direct_hash, direct_equal);
 
         Token.Command[] _valid_keys = {};
         public Token.Command[] valid_keys {get {return _valid_keys;}}
@@ -21,15 +21,15 @@ namespace Gue {
             if (!(command.command in valid_keys)
                     || command.arguments.length() != 1)
                 return false;
-            if (values.contains(&command.command))
+            if (values.contains(command.command))
                 throw new ParseError.INVALID("%s already set",
                     command.command.to_string());
-            values.set(&command.command, command.arguments.data);
+            values.set(command.command, command.arguments.data);
             return true;
         }
 
         public unowned string? @get(Token.Command key) {
-            return values.get(&key);
+            return values.get(key);
         }
     }
 
