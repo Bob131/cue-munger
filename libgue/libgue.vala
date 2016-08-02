@@ -77,8 +77,9 @@ namespace Gue {
 
         internal new bool parse_node(Node.Command command) throws ParseError {
             if (command.command == Token.Command.INDEX) {
-                if (command.arguments.data == "00"
-                        || command.arguments.data == "01") {
+                if (!parent.generated_by_eac &&
+                        (command.arguments.data == "00" ||
+                         command.arguments.data == "01")) {
                     uint minutes, seconds, frames;
                     command.arguments.next.data.scanf("%02d:%02d:%02d",
                         out minutes, out seconds, out frames);
@@ -116,6 +117,9 @@ namespace Gue {
         public string? barcode {get {
             return this.values[Token.Command.CATALOG];
         }}
+
+        internal bool _generated_by_eac = false;
+        public bool generated_by_eac {get {return _generated_by_eac;}}
 
         internal Track[] _tracks = {};
         public Track[] tracks {owned get {return _tracks;}}
@@ -182,6 +186,14 @@ namespace Gue {
                 if (command.command == Token.Command.PERFORMER)
                     default_performer_node = command;
             }
+
+            foreach (var comment in this.comments)
+                if (comment.has_prefix("COMMENT ExactAudioCopy")) {
+                    warning("It appears this file was generated with %s",
+                        "ExactAudioCopy. Some functionality has been disabled");
+                    _generated_by_eac = true;
+                    break;
+                }
 
             // start iterating from the first 'real' track
             foreach (var track_token in parse_tree.next) {
