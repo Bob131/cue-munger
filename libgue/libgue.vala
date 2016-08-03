@@ -118,9 +118,8 @@ namespace Gue {
                         (minutes * 60) + seconds + (frames * (1f / 75f));
                     if (parent.tracks.length > 0) {
                         var prev = parent.tracks[parent.tracks.length - 1];
-                        if (prev.start_time != null && prev.length == null) {
+                        if (prev.start_time != null && prev.length == null)
                             prev._length = _start_time - prev.start_time;
-                        }
                     }
                 }
                 return true;

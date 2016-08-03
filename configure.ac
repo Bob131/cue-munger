@@ -30,6 +30,7 @@ AC_SUBST([cue_U_VALAFLAGS], ["--pkg gio-2.0 \
           --target-glib=$GLIB_REQUIRED \
           --fatal-warnings \
           --enable-checking \
+          --enable-experimental \
           --enable-experimental-non-null"])
 
 AC_CHECK_PROG(RAGEL_CHECK,ragel,yes)

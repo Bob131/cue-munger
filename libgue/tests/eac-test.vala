@@ -1,4 +1,4 @@
-const string CUE_SHEET = """REM GENRE Pop
+const string EAC_CUE_SHEET = """REM GENRE Pop
 REM DATE 2015
 REM DISCID 170DCE14
 REM COMMENT "ExactAudioCopy v1.0b3"
@@ -130,7 +130,7 @@ void eac_test() {
         "*ExactAudioCopy*disabled");
     Gue.Sheet sheet;
     try {
-        sheet = new Gue.Sheet.parse_data(CUE_SHEET.data);
+        sheet = new Gue.Sheet.parse_data(EAC_CUE_SHEET.data);
     } catch (Error e) {
         error(e.message);
     }
@@ -151,16 +151,19 @@ void eac_test() {
 
     assert ((!) sheet.tracks[0].title == "I'm Alive");
     assert ((!) sheet.tracks[0].performer == "Elhaida Dani");
+    assert (sheet.tracks[0].number == 1);
     assert (sheet.tracks[0].start_time == null);
     assert (sheet.tracks[0].length == null);
 
     assert ((!) sheet.tracks[1].title == "Face The Shadow");
     assert ((!) sheet.tracks[1].performer == "Genealogy");
+    assert (sheet.tracks[1].number == 2);
     assert (sheet.tracks[1].start_time == null);
     assert (sheet.tracks[1].length == null);
 
     assert ((!) sheet.tracks[2].title == "I Am Yours");
     assert ((!) sheet.tracks[2].performer == "The Makemakes");
+    assert (sheet.tracks[2].number == 3);
     assert (sheet.tracks[2].start_time == null);
     assert (sheet.tracks[2].length == null);
 }
