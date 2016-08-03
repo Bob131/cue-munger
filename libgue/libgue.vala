@@ -221,6 +221,10 @@ namespace Gue {
             if (copy.has_prefix("\xef\xbb\xbf"))
                 copy = copy[3:copy.length];
 
+            // the lexer won't fully lex a line unless it ends with \r or \n
+            if (!(copy[copy.length - 1].to_string() in "\r\n"))
+                copy += "\n";
+
             var parse_tree = lex_cue((!) copy);
             if (parse_tree.length() == 1)
                 throw new ParseError.EMPTY("Cue sheet appears to be empty");
