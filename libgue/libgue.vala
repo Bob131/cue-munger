@@ -99,6 +99,9 @@ namespace Gue {
 
         internal new bool parse_node(Node.Command command) throws ParseError {
             if (command.command == Token.Command.INDEX) {
+                if (command.arguments.length() != 2)
+                    throw new ParseError.INVALID("INDEX command requires %s",
+                        "two arguments");
                 if (!is_eac &&
                         (command.arguments.data == "00" ||
                          command.arguments.data == "01")) {
