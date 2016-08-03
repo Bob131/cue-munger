@@ -56,7 +56,7 @@ namespace Gue {
         public string? performer {get {return values[Token.Command.PERFORMER];}}
 
         internal string[] _comments = {};
-        public string[] comments {owned get {return _comments;}}
+        public string[] comments {get {return _comments;}}
 
         internal bool parse_node(Node.Command command) throws ParseError {
             if (command.command == Token.Command.REM) {
@@ -75,7 +75,7 @@ namespace Gue {
     }
 
     public interface TrackContainer : Object {
-        public abstract Track[] tracks {owned get;}
+        public abstract Track[] tracks {get;}
         internal abstract signal void add_track(Track track);
     }
 
@@ -140,7 +140,7 @@ namespace Gue {
     // FILE can only contain TRACK commands, so don't inherit from Work
     public class File : Object, TrackContainer {
         private Track[] _tracks = {};
-        public Track[] tracks {owned get {return _tracks;}}
+        public Track[] tracks {get {return _tracks;}}
 
         string _name;
         public string name {get {return _name;}}
@@ -169,10 +169,10 @@ namespace Gue {
         public bool generated_by_eac {get {return _generated_by_eac;}}
 
         File[] _files = {};
-        public File[] files {owned get {return _files;}}
+        public File[] files {get {return _files;}}
 
         Track[] _tracks = {};
-        public Track[] tracks {owned get {return _tracks;}}
+        public Track[] tracks {get {return _tracks;}}
 
         public Sheet.parse_file(GLib.File file) throws Error {
             uint8[] data;
