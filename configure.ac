@@ -52,5 +52,6 @@ libgue/Makefile
 libgue/libgue.pc
 libgue/tests/Makefile
 src/Makefile
+cue-munger.spec
 ])
 AC_OUTPUT

@@ -54,6 +54,7 @@ Makefile.in
 .libs/
 
 *.cue
+cue-munger.spec
 
 **/tests/*
 !**/tests/*.vala
