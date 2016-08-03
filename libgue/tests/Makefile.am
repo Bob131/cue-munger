@@ -7,6 +7,7 @@ tests_SOURCES = \
 	../gue-$(VERSION).vapi \
 	eac-test.vala \
 	non-latin-test.vala \
+	utf16-test.vala \
 	tests.vala
 tests_VALAFLAGS = $(cue_U_VALAFLAGS)
 tests_CFLAGS = \

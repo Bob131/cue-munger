@@ -57,6 +57,7 @@ Makefile.in
 
 **/tests/*
 !**/tests/*.vala
+!**/tests/*.cue
 !**/tests/Makefile.am
 !**/tests/README.md
 
