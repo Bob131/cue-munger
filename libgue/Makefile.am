@@ -11,7 +11,7 @@ vapi_DATA = gue-$(VERSION).vapi gue-$(VERSION).deps
 
 girdir = $(datadir)/gir-1.0
 gir_DATA = Gue-$(VERSION).gir
-typelibdir = $(datadir)/girepository-1.0
+typelibdir = $(libdir)/girepository-1.0
 typelib_DATA = Gue-$(VERSION).typelib
 
 
@@ -48,6 +48,8 @@ libgue_la_CFLAGS = \
 	$(cue_U_CFLAGS)
 libgue_la_LIBADD = \
 	$(cue_U_LIBS)
+libgue_la_LDFLAGS = \
+	-release $(VERSION)
 
 
 CLEANFILES = \
