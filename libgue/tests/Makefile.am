@@ -4,7 +4,7 @@ test_programs = \
 	tests
 
 tests_SOURCES = \
-	../gue-$(VERSION).vapi \
+	../gue-$(SHORT_VERSION).vapi \
 	eac-test.vala \
 	non-latin-test.vala \
 	utf16-test.vala \

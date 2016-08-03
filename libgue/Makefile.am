@@ -7,25 +7,25 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgue.pc
 
 vapidir = $(datadir)/vala/vapi
-vapi_DATA = gue-$(VERSION).vapi gue-$(VERSION).deps
+vapi_DATA = gue-$(SHORT_VERSION).vapi gue-$(SHORT_VERSION).deps
 
 girdir = $(datadir)/gir-1.0
-gir_DATA = Gue-$(VERSION).gir
+gir_DATA = Gue-$(SHORT_VERSION).gir
 typelibdir = $(libdir)/girepository-1.0
-typelib_DATA = Gue-$(VERSION).typelib
+typelib_DATA = Gue-$(SHORT_VERSION).typelib
 
 
 BUILT_SOURCES = \
 	gue.h gue-priv.h \
 	libgue.pc \
-	gue-$(VERSION).vapi gue-$(VERSION).deps \
-	Gue-$(VERSION).gir Gue-$(VERSION).typelib \
+	gue-$(SHORT_VERSION).vapi gue-$(SHORT_VERSION).deps \
+	Gue-$(SHORT_VERSION).gir Gue-$(SHORT_VERSION).typelib \
 	scanner.c
 
-gue-$(VERSION).deps:
+gue-$(SHORT_VERSION).deps:
 	$(AM_V_GEN) printf "gio-2.0\n" > $@
 
-Gue-$(VERSION).typelib: Gue-$(VERSION).gir
+Gue-$(SHORT_VERSION).typelib: Gue-$(SHORT_VERSION).gir
 	$(AM_V_GEN) g-ir-compiler --shared-library=libgue.la --output=$@ $<
 
 scanner.c: scanner.rl
@@ -40,8 +40,8 @@ libgue_la_SOURCES = \
 libgue_la_VALAFLAGS = \
 	--library gue \
 	-H gue.h -h gue-priv.h \
-	--vapi gue-$(VERSION).vapi \
-	--gir Gue-$(VERSION).gir \
+	--vapi gue-$(SHORT_VERSION).vapi \
+	--gir Gue-$(SHORT_VERSION).gir \
 	--vapidir . --pkg uchardet \
 	$(cue_U_VALAFLAGS)
 libgue_la_CFLAGS = \
@@ -49,7 +49,7 @@ libgue_la_CFLAGS = \
 libgue_la_LIBADD = \
 	$(cue_U_LIBS)
 libgue_la_LDFLAGS = \
-	-release $(VERSION)
+	-release $(SHORT_VERSION)
 
 
 CLEANFILES = \

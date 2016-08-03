@@ -1,4 +1,4 @@
-AC_INIT([cue-munger], [0.7.2])
+AC_INIT([cue-munger], [0.7.3])
 
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
@@ -8,6 +8,9 @@ AM_SILENT_RULES([yes])
 
 AM_PROG_VALAC([0.28])
 AM_PROG_CC_C_O
+
+SHORT_VERSION=$(echo $VERSION | cut -d. -f-2)
+AC_SUBST([SHORT_VERSION])
 
 LT_INIT([disable-static])
 
