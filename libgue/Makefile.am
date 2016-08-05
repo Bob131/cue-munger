@@ -26,7 +26,7 @@ gue-$(SHORT_VERSION).deps:
 	$(AM_V_GEN) printf "gio-2.0\n" > $@
 
 Gue-$(SHORT_VERSION).typelib: Gue-$(SHORT_VERSION).gir
-	$(AM_V_GEN) g-ir-compiler --shared-library=libgue.la --output=$@ $<
+	$(AM_V_GEN) g-ir-compiler --shared-library=libgue --output=$@ $<
 
 scanner.c: scanner.rl
 	$(AM_V_GEN) ragel -o $@ $<
