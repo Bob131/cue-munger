@@ -71,25 +71,6 @@
     main := (delim* command newline+)*;
 
 }%%
-    /* main := ( */
-    /*     delim* */
-    /*     (string > MatchBegun % { */
-    /*         evaluator_add_command( */
-    /*             eval, g_strndup(match_start, fpc - match_start), error); */
-    /*         if (*error != NULL) { */
-    /*             p = match_start; */
-    /*             goto ret; */
-    /*         } */
-    /*     }) */
-    /*     (delim+ (quoted_string > MatchBegun % { */
-    /*         evaluator_add_string(eval, */
-    /*             g_strndup(match_start + 1, fpc - match_start - 2)); */
-    /*     } | string > MatchBegun % { */
-    /*         evaluator_add_string(eval, */
-    /*             g_strndup(match_start, fpc - match_start)); */
-    /*     }))* */
-    /*     newline+ */
-    /* )*; */
 
 %% write data;
 
