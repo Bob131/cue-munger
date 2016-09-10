@@ -241,11 +241,18 @@ namespace Gue {
                     default_performer_node = command;
             }
 
+            // Test whether we have one of EAC's broken cue sheets
             foreach (var comment in this.comments)
                 if (comment.has_prefix("COMMENT ExactAudioCopy")) {
-                    warning("It appears this file was generated with %s",
-                        "ExactAudioCopy. Some functionality has been disabled");
-                    _generated_by_eac = true;
+                    // The breakage appears to only affect the ordering of FILE
+                    // commands. If there's only one file, the EAC comment
+                    // shouldn't matter
+                    if (parse_tree.length() > 2) {
+                        warning("It appears this file was generated with %s%s",
+                            "ExactAudioCopy. Some functionality has been",
+                            " disabled");
+                        _generated_by_eac = true;
+                    }
                     break;
                 }
 
