@@ -34,8 +34,10 @@ scanner.c: scanner.rl
 
 libgue_la_SOURCES = \
 	scanner.c \
-	tokens.vala \
-	evaluator.vala \
+	parser/arguments.vala \
+	parser/commands.vala \
+	parser/nodes.vala \
+	parser/tree-builder.vala \
 	libgue.vala
 libgue_la_VALAFLAGS = \
 	--library gue \

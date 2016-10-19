@@ -126,44 +126,38 @@ FILE "20 - Boggie - Wars For Nothing.wav" WAVE
 
 
 void eac_test() {
-    Test.expect_message(null, LogLevelFlags.LEVEL_WARNING,
-        "*ExactAudioCopy*disabled");
     Gue.Sheet sheet;
     try {
         sheet = new Gue.Sheet.parse_data(EAC_CUE_SHEET.data);
     } catch (Error e) {
         error(e.message);
     }
-    Test.assert_expected_messages();
 
     assert ((!) sheet.title == "Eurovision Song Contest 2015 - Disc 1");
     assert ((!) sheet.performer == "Various Artists");
 
-    assert (sheet.generated_by_eac);
-    assert (sheet.files.length == 0);
-
     assert (sheet.comments[0] == "GENRE Pop");
     assert (sheet.comments[1] == "DATE 2015");
     assert (sheet.comments[2] == "DISCID 170DCE14");
-    assert (sheet.comments[3] == "COMMENT ExactAudioCopy v1.0b3");
+    assert (sheet.comments[3] == "COMMENT \"ExactAudioCopy v1.0b3\"");
 
     assert (sheet.tracks.length == 20);
 
     assert ((!) sheet.tracks[0].title == "I'm Alive");
     assert ((!) sheet.tracks[0].performer == "Elhaida Dani");
     assert (sheet.tracks[0].number == 1);
-    assert (sheet.tracks[0].start_time == null);
-    assert (sheet.tracks[0].length == null);
+    assert (sheet.tracks[0].start_time == 0);
+    assert (186.306f < sheet.tracks[0].length < 186.307f);
 
     assert ((!) sheet.tracks[1].title == "Face The Shadow");
     assert ((!) sheet.tracks[1].performer == "Genealogy");
     assert (sheet.tracks[1].number == 2);
-    assert (sheet.tracks[1].start_time == null);
-    assert (sheet.tracks[1].length == null);
+    assert (sheet.tracks[1].start_time == 0);
+    assert (180.493f < sheet.tracks[1].length < 180.494f);
 
     assert ((!) sheet.tracks[2].title == "I Am Yours");
     assert ((!) sheet.tracks[2].performer == "The Makemakes");
     assert (sheet.tracks[2].number == 3);
-    assert (sheet.tracks[2].start_time == null);
-    assert (sheet.tracks[2].length == null);
+    assert (sheet.tracks[2].start_time == 0);
+    assert (180.73f < sheet.tracks[2].length < 180.74f);
 }

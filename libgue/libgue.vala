@@ -2,91 +2,38 @@ namespace Gue {
     public errordomain ParseError {
         UNKNOWN,
         INVALID,
-        EMPTY
+        EMPTY,
+        UNSUPPORTED
     }
 
     public enum FileType {
         WAVE,
         MP3;
 
-        internal static FileType from_string(string input) throws ParseError {
+        internal static FileType from_string(string input) {
             var @enum = (EnumClass) typeof(FileType).class_ref();
             var type = @enum.get_value_by_nick(input.down());
-            if (type == null)
-                throw new Gue.ParseError.UNKNOWN("Unknown file type '%s'",
-                    input);
+            return_if_fail(type != null);
             return (FileType) ((!) type).value;
         }
     }
 
-    internal class StringValues {
-        HashTable<Token.Command, string?> values =
-            new HashTable<Token.Command, string?>(direct_hash, direct_equal);
-
-        Token.Command[] _valid_keys = {};
-        public Token.Command[] valid_keys {get {return _valid_keys;}}
-
-        public void set_valid(Token.Command[] keys) {
-            foreach (var key in keys)
-                _valid_keys += key;
-        }
-
-        public bool @set(Node.Command command) throws ParseError {
-            if (!(command.command in valid_keys)
-                    || command.arguments.length() != 1)
-                return false;
-            if (values.contains(command.command))
-                throw new ParseError.INVALID("%s already set",
-                    command.command.to_string());
-            values.set(command.command, command.arguments.data);
-            return true;
-        }
-
-        public unowned string? @get(Token.Command key) {
-            return values.get(key);
-        }
-    }
-
     public abstract class Work : Object {
-        internal StringValues values = new StringValues();
+        internal string? _title = null;
+        public string? title {get {return _title;}}
 
-        Token.Command[] valid_keys = {Token.Command.TITLE,
-            Token.Command.PERFORMER};
-        public string? title {get {return values[Token.Command.TITLE];}}
-        public string? performer {get {return values[Token.Command.PERFORMER];}}
+        internal string? _performer = null;
+        public string? performer {get {return _performer;}}
 
-        internal string[] _comments = {};
-        public string[] comments {get {return _comments;}}
-
-        internal bool parse_node(Node.Command command) throws ParseError {
-            if (command.command == Token.Command.REM) {
-                string?[]? words = {};
-                foreach (var arg in command.arguments)
-                    words += arg;
-                _comments += string.joinv(" ", words);
-                return true;
-            }
-            return values.set(command);
-        }
-
-        internal Work() {
-            values.set_valid(valid_keys);
-        }
-    }
-
-    public interface TrackContainer : Object {
-        public abstract Track[] tracks {get;}
-        internal abstract signal void add_track(Track track);
+        internal Work() {}
     }
 
     public class Track : Work {
-        Token.Command[] valid_keys = {Token.Command.ISRC};
-        public string? isrc {get {return this.values[Token.Command.ISRC];}}
+        internal string? _isrc = null;
+        public string? isrc {get {return _isrc;}}
 
         internal weak TrackContainer _parent;
         public weak TrackContainer parent {get {return _parent;}}
-
-        private bool is_eac;
 
         internal int _number;
         public int number {get {return _number;}}
@@ -97,47 +44,14 @@ namespace Gue {
         internal float? _length = null;
         public float? length {get {return _length;}}
 
-        internal new bool parse_node(Node.Command command) throws ParseError {
-            if (command.command == Token.Command.INDEX) {
-                if (command.arguments.length() != 2)
-                    throw new ParseError.INVALID("INDEX command requires %s",
-                        "two arguments");
-                if (!is_eac &&
-                        (command.arguments.data == "00" ||
-                         command.arguments.data == "01")) {
-                    uint minutes, seconds, frames;
-                    command.arguments.next.data.scanf("%02d:%02d:%02d",
-                        out minutes, out seconds, out frames);
-                    if (seconds >= 60)
-                        throw new ParseError.INVALID(
-                            "'%u' is an invalid seconds value", seconds);
-                    if (frames >= 75)
-                        throw new ParseError.INVALID(
-                            "'%u' is an invalid frames value", frames);
-                    _start_time =
-                        (minutes * 60) + seconds + (frames * (1f / 75f));
-                    if (parent.tracks.length > 0) {
-                        var prev = parent.tracks[parent.tracks.length - 1];
-                        if (prev.start_time != null && prev.length == null)
-                            prev._length = _start_time - prev.start_time;
-                    }
-                }
-                return true;
-            }
-            return base.parse_node(command);
-        }
-
-        internal Track(TrackContainer parent, bool is_eac, Node.Command track)
-            requires (track.command == Token.Command.TRACK)
-        {
-            this.values.set_valid(valid_keys);
-            _parent = parent;
-            this.is_eac = is_eac;
-            _number = int.parse(track.arguments.data);
-        }
+        internal Track() {}
     }
 
-    // FILE can only contain TRACK commands, so don't inherit from Work
+    public interface TrackContainer : Object {
+        public abstract Track[] tracks {get;}
+        internal abstract signal void add_track(Track track);
+    }
+
     public class File : Object, TrackContainer {
         private Track[] _tracks = {};
         public Track[] tracks {get {return _tracks;}}
@@ -148,22 +62,16 @@ namespace Gue {
         FileType _file_type;
         public FileType file_type {get {return _file_type;}}
 
-        internal File(Node.Track track) throws ParseError
-            requires (track.commands.length() == 1)
-            requires (track.commands.data.command == Token.Command.FILE)
-        {
-            unowned SList<string> args = track.commands.data.arguments;
-            _name = args.data;
-            _file_type = FileType.from_string(args.next.data);
-            this.add_track.connect((track) => {_tracks += track;});
+        internal File(FileCommand file) {
+            _name = file.file_name.@value;
+            _file_type = FileType.from_string(file.file_type.@value);
+            this.add_track.connect((track) => _tracks += track);
         }
     }
 
     public class Sheet : Work, TrackContainer {
-        Token.Command[] valid_keys = {Token.Command.CATALOG};
-        public string? barcode {get {
-            return this.values[Token.Command.CATALOG];
-        }}
+        internal string? _barcode = null;
+        public string? barcode {get {return _barcode;}}
 
         internal bool _generated_by_eac = false;
         public bool generated_by_eac {get {return _generated_by_eac;}}
@@ -173,6 +81,9 @@ namespace Gue {
 
         Track[] _tracks = {};
         public Track[] tracks {get {return _tracks;}}
+
+        string[] _comments = {};
+        public string[] comments {get {return _comments;}}
 
         public Sheet.parse_file(GLib.File file) throws Error {
             uint8[] data;
@@ -188,7 +99,9 @@ namespace Gue {
             Sheet.parse_data(data);
         }
 
-        public Sheet.parse_data(uint8[] data) throws ParseError {
+        public Sheet.parse_data(uint8[] data) throws ParseError
+            requires (data.length != -1)
+        {
             var detect = new CharsetDetect.Context();
             detect.handle_data((string) data, data.length);
             detect.data_end();
@@ -225,73 +138,105 @@ namespace Gue {
                 copy += "\n";
 
             var parse_tree = lex_cue((!) copy);
-            if (parse_tree.length() == 1)
-                throw new ParseError.EMPTY("Cue sheet appears to be empty");
 
-            this.values.set_valid(valid_keys);
+            this.add_track.connect((track) => _tracks += track);
 
-            Node.Command? default_performer_node = null;
+            foreach (var node in parse_tree.children) {
+                if (node is RemarkCommand)
+                    _comments += ((RemarkCommand) node).remark;
 
-            // CD-wide data is stored in a dummy node
-            foreach (var command in parse_tree.data.tracks.data.commands) {
-                if (!this.parse_node(command))
-                    throw new ParseError.INVALID("Unhandled command '%s'",
-                        command.command.to_string());
-                if (command.command == Token.Command.PERFORMER)
-                    default_performer_node = command;
-            }
+                else if (node is PerformerCommand)
+                    _performer = ((PerformerCommand) node).performer.@value;
 
-            // Test whether we have one of EAC's broken cue sheets
-            foreach (var comment in this.comments)
-                if (comment.has_prefix("COMMENT ExactAudioCopy")) {
-                    // The breakage appears to only affect the ordering of FILE
-                    // commands. If there's only one file, the EAC comment
-                    // shouldn't matter
-                    if (parse_tree.length() > 2) {
-                        warning("It appears this file was generated with %s%s",
-                            "ExactAudioCopy. Some functionality has been",
-                            " disabled");
-                        _generated_by_eac = true;
+                else if (node is CatalogCommand)
+                    _barcode = ((CatalogCommand) node).barcode.@value;
+
+                else if (node is TitleCommand)
+                    _title = ((TitleCommand) node).title.@value;
+
+                else if (node is FileCommand) {
+                    var file_node = (FileCommand) node;
+                    TrackContainer container;
+
+                    if (generated_by_eac)
+                        container = this;
+                    else {
+                        file_node.non_eac_validate();
+                        container = new File(file_node);
+                        container.add_track.connect(
+                            (track) => _tracks += track);
                     }
-                    break;
-                }
 
-            this.add_track.connect((track) => {_tracks += track;});
+                    foreach (var track_node in file_node.tracks) {
+                        var track = new Track();
+                        track._parent = container;
+                        track._number = track_node.track.number;
+                        track._performer = _performer;
 
-            // start iterating from the first 'real' track
-            foreach (var file_token in parse_tree.next) {
-                TrackContainer file;
-                if (generated_by_eac)
-                    file = this;
-                else {
-                    // file info is stored in a dummy track
-                    file = new File(file_token.tracks.data);
-                    file.add_track.connect((track) => {_tracks += track;});
-                }
+                        var seen_index = -1;
 
-                // skip file info
-                foreach (var track_token in file_token.tracks.next) {
-                    // track info is stored in the first command
-                    var track = new Track(file, generated_by_eac,
-                        track_token.commands.data);
+                        foreach (var track_child in track_node.children) {
+                            if (track_child is TitleCommand)
+                                track._title =
+                                    ((TitleCommand) track_child).title.@value;
+                            else if (track_child is PerformerCommand)
+                                track._performer = ((PerformerCommand) track_child)
+                                    .performer.@value;
+                            else if (track_child is IsrcCommand)
+                                track._isrc =
+                                    ((IsrcCommand) track_child).isrc.@value;
+                            else if (track_child is IndexCommand) {
+                                var index = (IndexCommand) track_child;
 
-                    // skip track info
-                    foreach (var command in track_token.commands.next)
-                        if (!track.parse_node(command))
-                            throw new ParseError.INVALID(
-                                "Unhandled command '%s'",
-                                command.command.to_string());
+                                if ((int) index.index.index_type < seen_index)
+                                    continue;
+                                seen_index = index.index.index_type;
 
-                    if (track.performer == null
-                            && default_performer_node != null)
-                        track.values.set((!) default_performer_node);
+                                var timestamp = index.timestamp.timestamp;
+                                var start_time = (timestamp.minutes * 60)
+                                    + timestamp.seconds
+                                    + (timestamp.frames / 75f);
 
-                    file.add_track(track);
-                }
+                                if (start_time == 0
+                                        && track._start_time != null)
+                                    continue;
 
-                if (file is File)
-                    _files += (File) file;
+                                track._start_time = start_time;
+
+                                if (container.tracks.length > 0) {
+                                    var prev_track = container
+                                        .tracks[container.tracks.length - 1];
+                                    if (prev_track._length == null)
+                                        prev_track._length = track._start_time
+                                            - prev_track._start_time;
+
+                                // This is to try and make sense of EAC's
+                                // jumbled-up INDEX commands
+                                } else if (start_time > 0) {
+                                    if (_tracks.length > 0) {
+                                        var prev_track =
+                                            _tracks[_tracks.length - 1];
+                                        if (prev_track._length == null)
+                                            prev_track._length = start_time;
+                                    }
+
+                                    track._start_time = null;
+                                }
+                            }
+                        }
+
+                        container.add_track(track);
+                    }
+
+                    if (container is File)
+                        _files += (File) container;
+
+                } else
+                    assert_not_reached();
             }
+
+            if (_tracks.length == 0)
+                throw new ParseError.EMPTY("Cue sheet appears to be empty");
         }
 
         internal Sheet() {}

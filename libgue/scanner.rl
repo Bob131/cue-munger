@@ -1,95 +1,111 @@
 #include "gue-priv.h"
 
+#define MATCH g_strndup (match_start, p - match_start)
+#define ADD(child) { \
+  Node* node = NODE (child); \
+  node->location = p - data; \
+  tree_builder_add (builder, node); \
+}
+
 %%{
-    machine cue_scanner;
+  machine cue_scanner;
 
-    blank         = [\t ];
-    newline       = [\r\n];
+  action MatchStart {
+    match_start = fpc;
+  }
 
-    delim         = blank+;
+  newline       = [\r\n];
+  blank         = space - newline;
 
-    action MatchStart {
-        match_start = fpc;
-    }
+  delim         = blank+;
 
-    action StringEnd {
-        evaluator_add_string(eval, g_strndup(match_start, fpc - match_start));
-    }
+  quoted_string = ('"' (any - newline)+ '"');
+  unquot_string = ^("'" | '"') ^(blank | newline)+;
+  string        = quoted_string | unquot_string;
 
-    quoted_string = ('"' ^('"' | newline)+ '"') | ("'" ^("'" | newline)+ "'");
-    unquot_string = ^("'" | '"') ^(blank | newline)+;
-    string        = (quoted_string > MatchStart % {
-                        evaluator_add_string(eval,
-                            g_strndup(match_start + 1, fpc - match_start - 2));
-                        }
-                    | unquot_string > MatchStart % StringEnd);
+  catalog       = "CATALOG" % {ADD (catalog_command_new ());}
+                    delim
+                    digit {13} > MatchStart % {
+                      ADD (barcode_argument_new (MATCH));
+                    };
 
-    action CmdEnd {
-        evaluator_add_command(eval, g_strndup(match_start, fpc - match_start),
-            error);
-        if (*error != NULL) {
-            p = match_start;
-            goto ret;
-        }
-    }
+  file          = "FILE" % {ADD (file_command_new ());}
+                    delim
+                    string > MatchStart % {ADD (argument_new (MATCH));}
+                    delim
+                    ("WAVE" | "MP3") > MatchStart % {
+                      ADD (file_type_argument_new (MATCH));
+                    };
 
-    catalog       = "CATALOG" > MatchStart % CmdEnd
-                        delim
-                        digit {13} > MatchStart % StringEnd;
-    file          = "FILE" > MatchStart % CmdEnd
-                        delim
-                        string
-                        delim
-                        ("WAVE" | "MP3") > MatchStart % StringEnd;
-    index         = "INDEX" > MatchStart % CmdEnd
-                        delim
-                        ("00" | "01") > MatchStart % StringEnd
-                        delim
-                        (digit {2} ':' digit {2} ':' digit {2})
-                            > MatchStart % StringEnd;
-    isrc          = "ISRC" > MatchStart % CmdEnd
-                        delim
-                        (alpha {2} alnum {3} digit {7})
-                            > MatchStart % StringEnd;
-    performer     = "PERFORMER" > MatchStart % CmdEnd
-                        delim
-                        string;
-    rem           = "REM" > MatchStart % CmdEnd
-                        (delim string)*;
-    title         = "TITLE" > MatchStart % CmdEnd
-                        delim
-                        string;
-    track         = "TRACK" > MatchStart % CmdEnd
-                        delim
-                        digit {2} > MatchStart % StringEnd
-                        delim
-                        "AUDIO";
+  index         = "INDEX" % {ADD (index_command_new ());}
+                    delim
+                    digit {2} > MatchStart % {
+                      ADD (index_argument_new (MATCH));
+                    }
+                    delim
+                    (digit | ':') {8} > MatchStart % {
+                      ADD (timestamp_argument_new (MATCH));
+                    };
 
-    command       = (catalog | file | index | isrc | performer | rem | title
-                        | track);
+  isrc          = "ISRC" % {ADD (isrc_command_new ());}
+                    delim
+                    alnum {12} > MatchStart % {
+                      ADD (isrc_argument_new (MATCH));
+                    };
 
-    main := (delim* command newline+)*;
+  performer     = "PERFORMER" % {ADD (performer_command_new ());}
+                    delim
+                    string > MatchStart % {ADD (argument_new (MATCH));};
 
+  rem           = "REM"
+                    (
+                      delim
+                      (any - newline)+ > MatchStart % {
+                        ADD (remark_command_new (MATCH));
+                      }
+                    )?;
+
+  title         = "TITLE" % {ADD (title_command_new ());}
+                    delim
+                    string > MatchStart % {
+                      ADD (argument_new (MATCH));
+                    };
+
+  track         = "TRACK" % {ADD (track_command_new ());}
+                    delim
+                    digit {2} > MatchStart % {
+                      ADD (track_argument_new (MATCH));
+                    }
+                    delim
+                    "AUDIO";
+
+  command       = (catalog | file | index | isrc | performer | rem | title
+                    | track);
+
+  main := (delim* command newline+)*;
 }%%
 
 %% write data;
 
-void scan_cue(Evaluator* eval, const gchar* data, glong* pos, GError** error) {
-    int cs;
+void scan_cue(TreeBuilder* builder,
+  const gchar* data,
+  glong* pos,
+  GError** error)
+{
+  int cs;
 
-    const char* p = data;
-    const char* pe = data + strlen(data);
+  const char* p = data;
+  const char* pe = data + strlen(data);
 
-    const char* match_start;
+  const char* match_start;
 
-    %% write init;
-    %% write exec;
+  %% write init;
+  %% write exec;
 
-    if (cs == cue_scanner_error)
-        g_set_error(error, GUE_PARSE_ERROR, GUE_PARSE_ERROR_INVALID,
-            "Failed to parse token");
+  if (cs == cue_scanner_error)
+    g_set_error(error, GUE_PARSE_ERROR, GUE_PARSE_ERROR_INVALID,
+        "Failed to parse token");
 
-ret:
-    *pos = p - data;
-    return;
+  *pos = p - data;
+  return;
 }
