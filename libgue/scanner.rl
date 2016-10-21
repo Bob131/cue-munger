@@ -19,7 +19,7 @@
 
   delim         = blank+;
 
-  quoted_string = ('"' (any - newline)+ '"');
+  quoted_string = ('"' (any - newline)+ '"') | ("'" (any - newline)+ "'");
   unquot_string = ^("'" | '"') ^(blank | newline)+;
   string        = quoted_string | unquot_string;
 
