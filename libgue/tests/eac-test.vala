@@ -141,23 +141,23 @@ void eac_test() {
     assert (sheet.comments[2] == "DISCID 170DCE14");
     assert (sheet.comments[3] == "COMMENT \"ExactAudioCopy v1.0b3\"");
 
-    assert (sheet.tracks.length == 20);
+    assert (sheet.tracks.size == 20);
 
     assert ((!) sheet.tracks[0].title == "I'm Alive");
     assert ((!) sheet.tracks[0].performer == "Elhaida Dani");
     assert (sheet.tracks[0].number == 1);
     assert (sheet.tracks[0].start_time == 0);
-    assert (186.306f < sheet.tracks[0].length < 186.307f);
+    assert (186.306 < sheet.tracks[0].length < 186.307);
 
     assert ((!) sheet.tracks[1].title == "Face The Shadow");
     assert ((!) sheet.tracks[1].performer == "Genealogy");
     assert (sheet.tracks[1].number == 2);
     assert (sheet.tracks[1].start_time == 0);
-    assert (180.493f < sheet.tracks[1].length < 180.494f);
+    assert (180.493 < sheet.tracks[1].length < 180.494);
 
     assert ((!) sheet.tracks[2].title == "I Am Yours");
     assert ((!) sheet.tracks[2].performer == "The Makemakes");
     assert (sheet.tracks[2].number == 3);
     assert (sheet.tracks[2].start_time == 0);
-    assert (180.73f < sheet.tracks[2].length < 180.74f);
+    assert (180.73 < sheet.tracks[2].length < 180.74);
 }

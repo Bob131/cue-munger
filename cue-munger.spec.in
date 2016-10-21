@@ -9,6 +9,7 @@ Source0:        %{url}/archive/%{version}.tar.gz
 
 BuildRequires:  vala
 BuildRequires:  glib2-devel
+BuildRequires:  libgee-devel
 BuildRequires:  gobject-introspection-devel
 BuildRequires:  ragel
 BuildRequires:  uchardet-devel

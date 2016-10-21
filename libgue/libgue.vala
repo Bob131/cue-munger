@@ -19,76 +19,157 @@ namespace Gue {
     }
 
     public abstract class Work : Object {
-        internal string? _title = null;
-        public string? title {get {return _title;}}
-
-        internal string? _performer = null;
-        public string? performer {get {return _performer;}}
-
-        internal Work() {}
+        public string? title {set; get;}
+        public string? performer {set; get;}
     }
 
     public class Track : Work {
-        internal string? _isrc = null;
-        public string? isrc {get {return _isrc;}}
+        public File parent {construct; get;}
 
-        internal weak TrackContainer _parent;
-        public weak TrackContainer parent {get {return _parent;}}
+        public string? isrc {set; get;}
+        public double? start_time {set; get;}
+        public int number {set; get;}
 
-        internal int _number;
-        public int number {get {return _number;}}
+        internal double? _length = null;
+        internal double? _tmp;
+        public double? length {get {
+            Track? next = null;
+            var next_index = parent.tracks.index_of(this) + 1;
+            if (parent.tracks.size > next_index)
+                next = parent.tracks[next_index];
 
-        internal float? _start_time = null;
-        public float? start_time {get {return _start_time;}}
+            if (_length == null && start_time != null && next != null
+                && ((!) next).start_time != null)
+            {
+                _tmp = ((!) next).start_time - start_time;
+                return _tmp;
+            } else
+                return _length;
+        }}
 
-        internal float? _length = null;
-        public float? length {get {return _length;}}
+        public Track(File parent, bool add = true) {
+            Object(parent: parent);
 
-        internal Track() {}
-    }
+            if (add) {
+                parent.tracks.add(this);
+                parent.parent.tracks.add(this);
+            }
 
-    public interface TrackContainer : Object {
-        public abstract Track[] tracks {get;}
-        internal abstract signal void add_track(Track track);
-    }
-
-    public class File : Object, TrackContainer {
-        private Track[] _tracks = {};
-        public Track[] tracks {get {return _tracks;}}
-
-        string _name;
-        public string name {get {return _name;}}
-
-        FileType _file_type;
-        public FileType file_type {get {return _file_type;}}
-
-        internal File(FileCommand file) {
-            _name = file.file_name.@value;
-            _file_type = FileType.from_string(file.file_type.@value);
-            this.add_track.connect((track) => _tracks += track);
+            this.notify["start-time"].connect(() => {
+                if (parent.parent.eac_dirty) {
+                    foreach (var track in parent.parent.tracks)
+                        track._length = null;
+                    parent.parent.eac_dirty = false;
+                }
+            });
         }
     }
 
-    public class Sheet : Work, TrackContainer {
-        internal string? _barcode = null;
-        public string? barcode {get {return _barcode;}}
+    public class File : Object {
+        public Sheet parent {construct; get;}
 
-        internal bool _generated_by_eac = false;
-        public bool generated_by_eac {get {return _generated_by_eac;}}
+        public string name {set; get;}
+        public FileType file_type {set; get;}
 
-        File[] _files = {};
-        public File[] files {get {return _files;}}
+        public Gee.LinkedList<Track> tracks = new Gee.LinkedList<Track>();
 
-        Track[] _tracks = {};
-        public Track[] tracks {get {return _tracks;}}
+        public File(Sheet parent, bool add = true) {
+            Object(parent: parent);
 
-        string[] _comments = {};
-        public string[] comments {get {return _comments;}}
+            if (add)
+                parent.files.add(this);
+        }
+    }
+
+    public class Sheet : Work {
+        public string? barcode {set; get;}
+
+        public Gee.LinkedList<File> files = new Gee.LinkedList<File>();
+        public Gee.LinkedList<string> comments = new Gee.LinkedList<string>();
+        public Gee.LinkedList<unowned Track> tracks =
+            new Gee.LinkedList<unowned Track>();
+
+        // Tracks whether we've specified any track lengths due to special
+        // handling of EAC-generated cue sheets
+        internal bool eac_dirty = false;
+
+        public string to_string() throws Gue.ParseError {
+            var builder = new TreeBuilder("");
+
+            if (title != null) {
+                builder.add(new TitleCommand());
+                builder.add(new Argument((!) title));
+            }
+
+            if (performer != null) {
+                builder.add(new PerformerCommand());
+                builder.add(new Argument((!) performer));
+            }
+
+            if (barcode != null) {
+                builder.add(new CatalogCommand());
+                builder.add(new BarcodeArgument((!) barcode));
+            }
+
+            foreach (var comment in comments)
+                builder.add(new RemarkCommand(comment));
+
+            foreach (var file in files) {
+                builder.add(new FileCommand());
+                builder.add(new Argument(file.name));
+
+                var file_type = file.file_type.to_string();
+                var split = file_type.split("_");
+                file_type = split[split.length - 1];
+                builder.add(new FileTypeArgument(file_type));
+
+                foreach (var track in file.tracks) {
+                    builder.add(new TrackCommand());
+                    builder.add(
+                        new TrackArgument(track.number.to_string("%02d")));
+
+                    if (track.title != null) {
+                        builder.add(new TitleCommand());
+                        builder.add(new Argument((!) track.title));
+                    }
+
+                    if (track.performer != null
+                        && track.performer != performer)
+                    {
+                        builder.add(new PerformerCommand());
+                        builder.add(new Argument((!) track.performer));
+                    }
+
+                    if (track.isrc != null) {
+                        builder.add(new IsrcCommand());
+                        builder.add(new IsrcArgument((!) track.isrc));
+                    }
+
+                    if (track.start_time != null) {
+                        builder.add(new IndexCommand());
+                        builder.add(new IndexArgument("00"));
+
+                        var start = (!) track.start_time;
+                        int minutes, seconds, frames;
+                        minutes = (int) Math.floor(start / 60);
+                        seconds = (int) Math.floor(start % 60);
+                        frames = (int) Math.round(
+                            (start - Math.floor(start)) * 75);
+
+                        var timestamp = "%02d:%02d:%02d".printf(minutes,
+                            seconds, frames);
+                        builder.add(new TimestampArgument(timestamp));
+                    }
+                }
+            }
+
+            var root = builder.end();
+            return root.to_string();
+        }
 
         public Sheet.parse_file(GLib.File file) throws Error {
             uint8[] data;
-            string _;
-            file.load_contents(null, out data, out _);
+            file.load_contents(null, out data, null);
             Sheet.parse_data(data);
         }
 
@@ -139,51 +220,42 @@ namespace Gue {
 
             var parse_tree = lex_cue((!) copy);
 
-            this.add_track.connect((track) => _tracks += track);
-
             foreach (var node in parse_tree.children) {
                 if (node is RemarkCommand)
-                    _comments += ((RemarkCommand) node).remark;
+                    comments.add(((RemarkCommand) node).remark);
 
                 else if (node is PerformerCommand)
-                    _performer = ((PerformerCommand) node).performer.@value;
+                    performer = ((PerformerCommand) node).performer.@value;
 
                 else if (node is CatalogCommand)
-                    _barcode = ((CatalogCommand) node).barcode.@value;
+                    barcode = ((CatalogCommand) node).barcode.@value;
 
                 else if (node is TitleCommand)
-                    _title = ((TitleCommand) node).title.@value;
+                    title = ((TitleCommand) node).title.@value;
 
                 else if (node is FileCommand) {
                     var file_node = (FileCommand) node;
-                    TrackContainer container;
-
-                    if (generated_by_eac)
-                        container = this;
-                    else {
-                        file_node.non_eac_validate();
-                        container = new File(file_node);
-                        container.add_track.connect(
-                            (track) => _tracks += track);
-                    }
+                    var file = new File(this, false);
+                    file.name = file_node.file_name.@value;
+                    file.file_type =
+                        FileType.from_string(file_node.file_type.@value);
 
                     foreach (var track_node in file_node.tracks) {
-                        var track = new Track();
-                        track._parent = container;
-                        track._number = track_node.track.number;
-                        track._performer = _performer;
+                        var track = new Track(file, false);
+                        track.number = track_node.track.number;
+                        track.performer = performer;
 
                         var seen_index = -1;
 
                         foreach (var track_child in track_node.children) {
                             if (track_child is TitleCommand)
-                                track._title =
+                                track.title =
                                     ((TitleCommand) track_child).title.@value;
                             else if (track_child is PerformerCommand)
-                                track._performer = ((PerformerCommand) track_child)
+                                track.performer = ((PerformerCommand) track_child)
                                     .performer.@value;
                             else if (track_child is IsrcCommand)
-                                track._isrc =
+                                track.isrc =
                                     ((IsrcCommand) track_child).isrc.@value;
                             else if (track_child is IndexCommand) {
                                 var index = (IndexCommand) track_child;
@@ -195,50 +267,43 @@ namespace Gue {
                                 var timestamp = index.timestamp.timestamp;
                                 var start_time = (timestamp.minutes * 60)
                                     + timestamp.seconds
-                                    + (timestamp.frames / 75f);
+                                    + (timestamp.frames / 75.0);
 
-                                if (start_time == 0
-                                        && track._start_time != null)
+                                if (start_time == 0 && track.start_time != null)
                                     continue;
 
-                                track._start_time = start_time;
-
-                                if (container.tracks.length > 0) {
-                                    var prev_track = container
-                                        .tracks[container.tracks.length - 1];
-                                    if (prev_track._length == null)
-                                        prev_track._length = track._start_time
-                                            - prev_track._start_time;
+                                track.start_time = start_time;
 
                                 // This is to try and make sense of EAC's
                                 // jumbled-up INDEX commands
-                                } else if (start_time > 0) {
-                                    if (_tracks.length > 0) {
-                                        var prev_track =
-                                            _tracks[_tracks.length - 1];
-                                        if (prev_track._length == null)
+                                if (file.tracks.size == 0 && track.number != 1
+                                    && start_time > 0)
+                                {
+                                    eac_dirty = true;
+
+                                    if (tracks.size > 0) {
+                                        var prev_track = tracks.last();
+                                        if (prev_track.length == null)
                                             prev_track._length = start_time;
                                     }
 
-                                    track._start_time = null;
+                                    track.start_time = null;
                                 }
                             }
                         }
 
-                        container.add_track(track);
+                        file.tracks.add(track);
+                        tracks.add(track);
                     }
 
-                    if (container is File)
-                        _files += (File) container;
+                    files.add(file);
 
                 } else
                     assert_not_reached();
             }
 
-            if (_tracks.length == 0)
+            if (tracks.size == 0)
                 throw new ParseError.EMPTY("Cue sheet appears to be empty");
         }
-
-        internal Sheet() {}
     }
 }

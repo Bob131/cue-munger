@@ -23,7 +23,7 @@ BUILT_SOURCES = \
 	scanner.c
 
 gue-$(SHORT_VERSION).deps:
-	$(AM_V_GEN) printf "gio-2.0\n" > $@
+	$(AM_V_GEN) printf "gio-2.0\ngee-0.8\n" > $@
 
 Gue-$(SHORT_VERSION).typelib: Gue-$(SHORT_VERSION).gir
 	$(AM_V_GEN) g-ir-compiler --shared-library=libgue --output=$@ $<

@@ -130,11 +130,11 @@ void pathological_eac_test() {
     assert (sheet.comments[2] == "DISCID DA0DA811");
     assert (sheet.comments[3] == "COMMENT \"ExactAudioCopy v1.0b3\"");
 
-    assert (sheet.tracks.length == 17);
-    assert (sheet.files.length == 17);
+    assert (sheet.tracks.size == 17);
+    assert (sheet.files.size == 17);
 
     foreach (var file in sheet.files)
-        assert (file.tracks.length == 1);
+        assert (file.tracks.size == 1);
 
     assert (sheet.files[0].tracks[0] == sheet.tracks[0]);
     assert ((!) sheet.tracks[0].title == "Walk The Line");
@@ -148,7 +148,7 @@ void pathological_eac_test() {
         == "Fancy (Feat. Charli XCX) (GTA Remix)");
     assert (sheet.tracks[15].number == 16);
     assert (sheet.tracks[15].start_time == 0);
-    assert (sheet.tracks[15].length == 251.92f);
+    assert (sheet.tracks[15].length == 251.92);
 
     assert (sheet.tracks[16].length == null);
 }

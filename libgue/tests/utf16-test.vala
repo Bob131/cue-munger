@@ -12,16 +12,15 @@ void utf16_test() {
     assert ((!) sheet.title == "Love.Angel.Music.Baby.");
     assert ((!) sheet.performer == "Gwen Stefani");
 
-    assert (sheet.comments.length == 2);
+    assert (sheet.comments.size == 2);
     assert (sheet.comments[0] == "GENRE Pop");
     assert (sheet.comments[1] == "DATE 2004");
 
-    assert (!sheet.generated_by_eac);
     foreach (var file in sheet.files)
         assert (file.file_type == Gue.FileType.WAVE);
 
-    assert (sheet.files.length == sheet.tracks.length);
-    for (var i = 0; i < sheet.tracks.length; i++)
+    assert (sheet.files.size == sheet.tracks.size);
+    for (var i = 0; i < sheet.tracks.size; i++)
         assert (sheet.files[i].tracks[0] == sheet.tracks[i]);
 
     assert (sheet.files[0].name ==

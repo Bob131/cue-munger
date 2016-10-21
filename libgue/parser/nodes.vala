@@ -95,6 +95,52 @@ internal class RootNode : Node {
         base.validate();
     }
 
+    string to_string_recurse(Command node, int indent) {
+        if (node is RemarkCommand)
+            return @"REM $(((RemarkCommand) node).remark)";
+
+        var ret = "";
+
+        for (var i = 0; i < indent * 4; i++)
+            ret += " ";
+
+        var type_name = Type.from_instance(node).name();
+        type_name = type_name.replace("Command", "");
+        ret += type_name.up();
+
+        foreach (var arg in node.args.children) {
+            var arg_string = ((Argument) arg).@value;
+
+            if (Type.from_instance(arg) == typeof(Argument))
+                arg_string = @"\"$arg_string\"";
+
+            ret += @" $arg_string";
+        }
+
+        if (node is TrackCommand)
+            ret += " AUDIO";
+
+        foreach (var child in node.children) {
+            if (!(child is Command))
+                continue;
+            ret += "\n";
+            ret += to_string_recurse((Command) child, indent + 1);
+        }
+
+        return ret;
+    }
+
+    public string to_string() {
+        var ret = "";
+
+        foreach (var child in children) {
+            ret += to_string_recurse((Command) child, 0);
+            ret += "\n";
+        }
+
+        return ret;
+    }
+
     public RootNode(string data) {
         this.data = data;
     }

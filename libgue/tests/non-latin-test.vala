@@ -176,12 +176,11 @@ void non_latin_test() {
         "好きっていいなよ。 Music&Drama Collection CD vol.1");
     assert ((!) sheet.performer == "野見祐二");
 
-    assert (!sheet.generated_by_eac);
-    assert (sheet.files.length == 1);
+    assert (sheet.files.size == 1);
     assert (sheet.files[0].file_type == Gue.FileType.WAVE);
 
-    assert (sheet.files[0].tracks.length == sheet.tracks.length);
-    for (var i = 0; i < sheet.tracks.length; i++)
+    assert (sheet.files[0].tracks.size == sheet.tracks.size);
+    for (var i = 0; i < sheet.tracks.size; i++)
         assert (sheet.files[0].tracks[i] == sheet.tracks[i]);
 
     assert ((!) sheet.tracks[0].title ==
@@ -190,14 +189,13 @@ void non_latin_test() {
     assert ((!) sheet.tracks[0].isrc == "JPKI01216342");
     assert (sheet.tracks[0].number == 1);
     assert (sheet.tracks[0].start_time == 0);
-    assert (sheet.tracks[0].length == 303.04f);
+    assert (sheet.tracks[0].length == 305.84);
 
     assert ((!) sheet.tracks[1].title == "Say “I love you”.");
     assert ((!) sheet.tracks[1].performer == "野見祐二");
     assert ((!) sheet.tracks[1].isrc == "JPKI01216297");
     assert (sheet.tracks[1].number == 2);
-    assert (sheet.tracks[1].start_time == 305.84f);
-    assert (sheet.tracks[1].length == 163.253326f);
+    assert (165.053 < sheet.tracks[1].length < 165.054);
 
     assert ((!) sheet.tracks[2].title ==
         "オーディオドラマめいとマシュマロ①「めいとマシュマロ」");
@@ -206,12 +204,12 @@ void non_latin_test() {
     assert ((!) sheet.tracks[2].isrc == "JPKI01216350");
     assert (sheet.tracks[2].number == 3);
     assert (470.89 < sheet.tracks[2].start_time < 470.9);
-    assert (sheet.tracks[2].length == 70.72f);
+    assert (72.51 < sheet.tracks[2].length < 72.52);
 
     assert ((!) sheet.tracks[26].title == "どうしようもないくらい");
     assert ((!) sheet.tracks[26].performer == "野見祐二");
     assert ((!) sheet.tracks[26].isrc == "JPKI01216317");
     assert (sheet.tracks[26].number == 27);
-    assert (sheet.tracks[26].start_time == 2750.48f);
+    assert (sheet.tracks[26].start_time == 2750.48);
     assert (sheet.tracks[26].length == null);
 }
