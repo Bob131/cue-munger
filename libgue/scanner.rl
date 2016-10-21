@@ -82,7 +82,7 @@
   command       = (catalog | file | index | isrc | performer | rem | title
                     | track);
 
-  main := (delim* command newline+)*;
+  main := (delim* command? newline+)*;
 }%%
 
 %% write data;
