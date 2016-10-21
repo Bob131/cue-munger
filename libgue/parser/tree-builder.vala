@@ -1,7 +1,14 @@
 string line_offset(long pos, string buffer) {
     var copy = buffer[0 : pos];
     var lines = copy.split("\n");
-    return @"line $(lines.length), column $(lines[lines.length - 1].length)";
+
+    var line_template = "line %d, column %d";
+
+    if (lines.length == 0)
+        return line_template.printf(1, pos + 1);
+
+    return line_template.printf(lines.length,
+        lines[lines.length - 1].length + 1);
 }
 
 internal class TreeBuilder : Object {
