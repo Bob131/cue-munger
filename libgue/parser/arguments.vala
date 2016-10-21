@@ -27,6 +27,7 @@ internal class Arguments : Node {
 
 internal class Argument : Node {
     public string @value = "";
+    char? quote = null;
 
     public override void validate() throws Gue.ParseError {
         if (!(parent is Arguments))
@@ -38,12 +39,22 @@ internal class Argument : Node {
         if (@value.length < 1)
             error("Empty argument");
 
+        foreach (var @char in @value.data)
+            if (@char == '\n' || @char == '\r')
+                error("Illegal newline in argument");
+            else if (quote != null && @char == (!) quote)
+                error("Illegal quote in argument");
+
         base.validate();
     }
 
     public Argument(owned string input) {
-        if (input[0] == '"' && input[input.length - 1] == '"')
+        if (input[0] == '"' && input[input.length - 1] == '"'
+            || input[0] == '\'' && input[input.length - 1] == '\'')
+        {
+            quote = input[0];
             input = input[1 : input.length - 1];
+        }
         @value = input;
     }
 }
