@@ -6,6 +6,7 @@ test_programs = \
 tests_SOURCES = \
 	../gue-$(SHORT_VERSION).vapi \
 	eac-test.vala \
+	pathological-eac-test.vala \
 	non-latin-test.vala \
 	utf16-test.vala \
 	tests.vala
